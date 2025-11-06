@@ -1,0 +1,1665 @@
+ass 2 - CRUD AND OTHER 10 DLL MYSQL
+
+-----------------------------------------------------------------------
+DROP DATABASE IF EXISTS company_db;
+
+CREATE DATABASE company_db;
+
+USE company_db;
+
+
+CREATE TABLE Departments (
+    dept_id INT PRIMARY KEY AUTO_INCREMENT,
+    dept_name VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE Employees (
+    emp_id INT PRIMARY KEY AUTO_INCREMENT,
+    emp_name VARCHAR(100) NOT NULL,
+    emp_email VARCHAR(100) NOT NULL UNIQUE,
+    emp_salary DECIMAL(10, 2),
+    emp_dept_id INT,
+    CONSTRAINT chk_salary CHECK (emp_salary > 20000),
+    CONSTRAINT fk_dept FOREIGN KEY (emp_dept_id) REFERENCES Departments(dept_id)
+);
+
+
+CREATE INDEX idx_emp_name ON Employees(emp_name);
+
+
+CREATE VIEW Employee_Details AS
+SELECT e.emp_id, e.emp_name, e.emp_email, d.dept_name
+FROM Employees e
+JOIN Departments d ON e.emp_dept_id = d.dept_id;
+
+
+CREATE VIEW emp_synonym AS
+SELECT * FROM Employees;
+
+
+INSERT INTO Departments (dept_name) VALUES
+('Engineering'),
+('Sales'),
+('Marketing'),
+('HR');
+
+INSERT INTO Employees (emp_name, emp_email, emp_salary, emp_dept_id) VALUES
+('Amit Sharma', 'amit.sharma@comp.com', 75000, 1),
+('Priya Singh', 'priya.singh@comp.com', 80000, 1),
+('Rohan Gupta', 'rohan.gupta@comp.com', 55000, 2),
+('Sneha Desai', 'sneha.desai@comp.com', 60000, 3),
+('Vikram Patel', 'vikram.patel@comp.com', 45000, 2),
+('Meera Krish', 'meera.k@comp.com', 65000, 4);
+
+
+SELECT * FROM Employees;
+
+
+SELECT emp_name, emp_salary FROM Employees WHERE emp_salary > 70000;
+
+
+SELECT * FROM Employee_Details;
+
+
+SELECT emp_name, emp_email FROM Employees WHERE emp_dept_id = 2;
+
+UPDATE Employees SET emp_salary = 62000 WHERE emp_name = 'Sneha Desai';
+
+DELETE FROM Employees WHERE emp_name = 'Vikram Patel';
+
+SELECT COUNT(emp_id) AS total_employees FROM Employees;
+
+
+SELECT d.dept_name, COUNT(e.emp_id) AS employee_count
+FROM Departments d
+LEFT JOIN Employees e ON d.dept_id = e.emp_dept_id
+GROUP BY d.dept_name;
+
+
+SELECT d.dept_name, AVG(e.emp_salary) AS average_salary
+FROM Departments d
+JOIN Employees e ON d.dept_id = e.emp_dept_id
+GROUP BY d.dept_name
+HAVING average_salary > 60000;
+
+SELECT emp_name FROM Employees WHERE emp_name LIKE 'A%';
+
+SELECT emp_name, emp_salary FROM Employees WHERE emp_salary BETWEEN 50000 AND 70000;
+
+SELECT * FROM emp_synonym WHERE emp_dept_id = 1;
+
+
+
+-----------------------------------------------------------------------
+
+ass3 - JOINS MYSQL
+
+-----------------------------------------------------------------------
+DROP DATABASE IF EXISTS company_advanced_db;
+CREATE DATABASE company_advanced_db;
+USE company_advanced_db;
+
+CREATE TABLE Departments (
+    dept_id INT PRIMARY KEY AUTO_INCREMENT,
+    dept_name VARCHAR(100) NOT NULL UNIQUE,
+    location VARCHAR(100)
+);
+
+CREATE TABLE Employees (
+    emp_id INT PRIMARY KEY AUTO_INCREMENT,
+    emp_name VARCHAR(100) NOT NULL,
+    emp_salary DECIMAL(10, 2),
+    emp_dept_id INT,
+    CONSTRAINT fk_dept FOREIGN KEY (emp_dept_id) REFERENCES Departments(dept_id)
+);
+
+CREATE TABLE Projects (
+    proj_id INT PRIMARY KEY AUTO_INCREMENT,
+    proj_name VARCHAR(100) NOT NULL,
+    proj_budget DECIMAL(12, 2)
+);
+
+CREATE TABLE Employee_Projects (
+    emp_id INT,
+    proj_id INT,
+    role VARCHAR(50),
+    PRIMARY KEY (emp_id, proj_id),
+    CONSTRAINT fk_emp FOREIGN KEY (emp_id) REFERENCES Employees(emp_id) ON DELETE CASCADE,
+    CONSTRAINT fk_proj FOREIGN KEY (proj_id) REFERENCES Projects(proj_id) ON DELETE CASCADE
+);
+
+INSERT INTO Departments (dept_name, location) VALUES
+('Engineering', 'Mumbai'),
+('Sales', 'Delhi'),
+('Marketing', 'Bangalore'),
+('HR', 'Mumbai'),
+('Finance', 'Delhi');
+
+INSERT INTO Employees (emp_name, emp_salary, emp_dept_id) VALUES
+('Ravi Kumar', 75000, 1),
+('Priya Sharma', 80000, 1),
+('Amit Singh', 60000, 2),
+('Sneha Reddy', 65000, 3),
+('Vikram Patel', 55000, 2),
+('Geeta Rao', 90000, 4),
+('Suresh Jain', 110000, 1),
+('Anjali Bose', 72000, 3),
+('Rohan Mehra', 85000, 5),
+('Aditi Verma', 50000, NULL);
+
+INSERT INTO Projects (proj_name, proj_budget) VALUES
+('Project Alpha', 500000),
+('Project Beta', 1200000),
+('Project Gamma', 750000),
+('Project Delta', 250000);
+
+INSERT INTO Employee_Projects (emp_id, proj_id, role) VALUES
+(1, 1, 'Developer'),
+(2, 1, 'Lead Developer'),
+(1, 2, 'Developer'),
+(3, 3, 'Sales Lead'),
+(5, 3, 'Sales Associate'),
+(6, 2, 'HR Coordinator'),
+(7, 2, 'Project Manager'),
+(8, 3, 'Marketing Lead');
+
+CREATE VIEW v_Employee_Dept_Project AS
+SELECT 
+    e.emp_name, 
+    e.emp_salary, 
+    d.dept_name, 
+    d.location,
+    p.proj_name,
+    ep.role
+FROM Employees e
+LEFT JOIN Departments d ON e.emp_dept_id = d.dept_id
+LEFT JOIN Employee_Projects ep ON e.emp_id = ep.emp_id
+LEFT JOIN Projects p ON ep.proj_id = p.proj_id;
+
+SELECT emp_name, emp_salary, dept_name
+FROM Employees
+INNER JOIN Departments ON Employees.emp_dept_id = Departments.dept_id;
+
+SELECT e.emp_name, d.dept_name
+FROM Employees e
+LEFT JOIN Departments d ON e.emp_dept_id = d.dept_id;
+
+SELECT e.emp_name, d.dept_name
+FROM Employees e
+RIGHT JOIN Departments d ON e.emp_dept_id = d.dept_id;
+
+SELECT e.emp_name, d.dept_name
+FROM Employees e
+LEFT JOIN Departments d ON e.emp_dept_id = d.dept_id
+UNION
+SELECT e.emp_name, d.dept_name
+FROM Employees e
+RIGHT JOIN Departments d ON e.emp_dept_id = d.dept_id;
+
+SELECT emp_name, emp_salary
+FROM Employees
+WHERE emp_salary > (SELECT AVG(emp_salary) FROM Employees);
+
+SELECT emp_name
+FROM Employees
+WHERE emp_id IN (
+    SELECT emp_id FROM Employee_Projects WHERE proj_id = (
+        SELECT proj_id FROM Projects WHERE proj_name = 'Project Beta'
+    )
+);
+
+SELECT emp_name, emp_salary, emp_dept_id
+FROM Employees e1
+WHERE emp_salary = (
+    SELECT MAX(emp_salary) 
+    FROM Employees e2 
+    WHERE e1.emp_dept_id = e2.emp_dept_id
+);
+
+SELECT emp_name, (
+    SELECT COUNT(proj_id) 
+    FROM Employee_Projects ep 
+    WHERE ep.emp_id = e.emp_id
+) AS project_count
+FROM Employees e
+ORDER BY project_count DESC;
+
+SELECT dept_name, avg_salary
+FROM (
+    SELECT d.dept_name, AVG(e.emp_salary) AS avg_salary
+    FROM Employees e
+    JOIN Departments d ON e.emp_dept_id = d.dept_id
+    GROUP BY d.dept_name
+) AS DeptAverages
+WHERE avg_salary > 70000;
+
+SELECT emp_name, dept_name, proj_name, role
+FROM Employees e
+JOIN Departments d ON e.emp_dept_id = d.dept_id
+JOIN Employee_Projects ep ON e.emp_id = ep.emp_id
+JOIN Projects p ON ep.proj_id = p.proj_id
+WHERE d.location = 'Mumbai';
+
+SELECT * FROM v_Employee_Dept_Project
+WHERE emp_salary > 60000 AND proj_name IS NOT NULL;
+
+UPDATE Employees
+SET emp_salary = emp_salary * 1.10
+WHERE emp_dept_id = (
+    SELECT dept_id FROM Departments WHERE dept_name = 'Engineering'
+);
+
+DELETE FROM Projects
+WHERE proj_id NOT IN (
+    SELECT DISTINCT proj_id FROM Employee_Projects
+);
+
+
+-----------------------------------------------------------------------
+
+ass4a)- PLSQL FINE LIBRARY
+
+-----------------------------------------------------------------------
+
+
+CREATE DATABASE IF NOT EXISTS ass4;
+USE ass5;
+
+-- Step 1️⃣: Drop existing tables for re-run
+DROP TABLE IF EXISTS Fine;
+DROP TABLE IF EXISTS Borrower;
+
+-- Step 2️⃣: Create Borrower table
+CREATE TABLE Borrower (
+    Rollno INT PRIMARY KEY,
+    Name VARCHAR(100),
+    DateofIssue DATE,
+    NameofBook VARCHAR(200),
+    Status CHAR(1)   -- 'I' = Issued, 'R' = Returned
+);
+
+-- Step 3️⃣: Create Fine table (avoid reserved word 'date')
+CREATE TABLE Fine (
+    Roll_no INT,
+    FineDate DATE,
+    Amt DECIMAL(10,2),
+    FOREIGN KEY (Roll_no) REFERENCES Borrower(Rollno)
+);
+
+-- Step 4️⃣: Insert sample data
+INSERT INTO Borrower (Rollno, Name, DateofIssue, NameofBook, Status) VALUES
+(101, 'Aman',  '2025-07-01', 'Database Systems', 'R'),
+(102, 'Priya', '2025-06-10', 'Operating Systems', 'I'),
+(103, 'Ravi',  '2025-07-10', 'Computer Networks', 'I'),
+(104, 'Neha',  '2025-06-01', 'Java Programming', 'I'),
+(105, 'Arjun', '2025-07-01', 'Data Structures', 'I'),
+(106, 'Sneha', '2025-07-20', 'Machine Learning', 'I'),
+(107, 'Rahul', '2025-06-15', 'Cloud Computing', 'R');
+
+INSERT INTO Fine (Roll_no, FineDate, Amt)
+VALUES (107, '2025-07-10', 325.00);
+
+-- Step 5️⃣: Create Stored Procedure
+DELIMITER //
+
+CREATE PROCEDURE return_book (
+  IN p_rollno INT,
+  IN p_bookname VARCHAR(200)
+)
+BEGIN
+    DECLARE v_date_of_issue DATE;
+    DECLARE v_days INT DEFAULT 0;
+    DECLARE v_fine DECIMAL(10,2) DEFAULT 0.00;
+    DECLARE v_status CHAR(1);
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SELECT 'An error occurred. Please check inputs or try again.' AS ErrorMessage;
+    END;
+
+    -- Try fetching the issue info
+    SELECT DateofIssue, Status
+    INTO v_date_of_issue, v_status
+    FROM Borrower
+    WHERE Rollno = p_rollno AND NameofBook = p_bookname
+    LIMIT 1;
+
+    -- If no matching record found
+    IF v_date_of_issue IS NULL THEN
+        SELECT CONCAT('No issued record found for Rollno=', p_rollno, ' and Book=', p_bookname) AS Message;
+    ELSE
+        -- If already returned
+        IF v_status = 'R' THEN
+            SELECT 'Book has already been returned.' AS Message;
+        ELSE
+            -- Calculate fine
+            SET v_days = DATEDIFF(CURDATE(), v_date_of_issue);
+
+            IF v_days > 30 THEN
+                SET v_fine = (15 * 5) + ((v_days - 30) * 50);
+            ELSEIF v_days > 15 THEN
+                SET v_fine = (v_days - 15) * 5;
+            ELSE
+                SET v_fine = 0;
+            END IF;
+
+            -- Update borrower status
+            UPDATE Borrower
+            SET Status = 'R'
+            WHERE Rollno = p_rollno AND NameofBook = p_bookname;
+
+            -- Insert fine if applicable
+            IF v_fine > 0 THEN
+                INSERT INTO Fine (Roll_no, FineDate, Amt)
+                VALUES (p_rollno, CURDATE(), v_fine);
+            END IF;
+
+            -- Final message
+            SELECT 'Book returned successfully.' AS Message, v_days AS Days_Borrowed, v_fine AS Fine;
+        END IF;
+    END IF;
+END;
+//
+
+DELIMITER ;
+
+-- Step 6️⃣: Test Procedure
+CALL return_book(102, 'Operating Systems');
+CALL return_book(107, 'Cloud Computing');
+
+-- Step 7️⃣: View Tables
+SELECT * FROM Borrower;
+SELECT * FROM Fine;
+
+
+
+
+
+
+-- -----------------------------------------------------------------
+-- 💬 Viva Preparation Notes
+-- -----------------------------------------------------------------
+-- 🔹 1Purpose:
+--     To automate fine calculation and update borrower status
+--     whenever a book is returned.
+
+-- 🔹 2What is DATEDIFF() used for?
+--     ➤ It calculates the number of days between the issue date and current date.
+
+-- 🔹 3Why use EXIT HANDLER?
+--     ➤ To catch SQL errors and prevent the procedure from stopping abruptly.
+
+-- 🔹 4Why use IF v_date_of_issue IS NULL?
+--     ➤ To check if the given Rollno and Bookname exist in the Borrower table.
+
+-- 🔹 5Explain the fine logic:
+--     ➤ No fine for 15 days, ₹5/day for next 15 days, and ₹50/day after 30 days.
+
+-- 🔹 6Why use CURDATE()?
+--     ➤ CURDATE() returns the system’s current date, used to calculate delay.
+
+-- 🔹 7Why Status = 'I' or 'R'?
+--     ➤ 'I' = book is currently issued, 'R' = book has been returned.
+
+-- 🔹 8How can this be automated further?
+--     ➤ By adding a TRIGGER to auto-calculate fine when a borrower’s status changes to 'R'.
+
+-- 🔹 9Real-Life Application:
+--     ➤ Used in library management systems to handle book returns and fine tracking.
+
+-- 🔹10what will happen if you call return_book twice for the same entry?
+--     ➤ The second call will display “Book has already been returned.”
+-- -----------------------------------------------------------------
+
+
+ass4b)-- PLSQL AREA
+
+-----------------------------------------------------------------------
+
+
+ 
+-- Step 1️⃣: Create database (optional, for organization)
+CREATE DATABASE IF NOT EXISTS sagar_ass9;
+USE sagar_ass9;
+
+DROP TABLE IF EXISTS areas;
+
+CREATE TABLE areas(
+    radius DECIMAL(5,2),     -- Radius value (e.g., 5.00, 6.00, etc.)
+    area   DECIMAL(10,2)     -- Computed area of circle
+);
+
+DELIMITER //
+
+CREATE PROCEDURE calculate_area()
+BEGIN
+    -- Declare local variables
+    DECLARE radius DECIMAL(5,2);
+    DECLARE area DECIMAL(10,2);
+    DECLARE i INT DEFAULT 5;         -- Starting radius value
+
+    -- WHILE loop runs from radius = 5 to 9
+    WHILE i <= 9 DO
+        SET radius = i;                             -- Assign radius
+        SET area = 3.14159 * radius * radius;       -- Area = πr²
+        INSERT INTO areas(radius, area)             -- Store result
+        VALUES (radius, area);
+        SET i = i + 1;                              -- Increment radius
+    END WHILE;
+END //
+DELIMITER ;
+
+CALL calculate_area();
+
+SELECT * FROM areas;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- -----------------------------------------------------------------
+-- 💬 Viva Preparation Notes
+-- -----------------------------------------------------------------
+-- 🔹 1️⃣ What is a Stored Procedure?
+--     ➤ A stored block of SQL statements that can be executed by a single call.
+
+-- 🔹 2️⃣ What does WHILE do in MySQL?
+--     ➤ WHILE repeatedly executes statements as long as a condition is TRUE.
+
+-- 🔹 3️⃣ Why use DECLARE inside BEGIN...END?
+--     ➤ Variables must be declared inside the procedure block.
+
+-- 🔹 4️⃣ Formula used for area:
+--     ➤ Area = π × r² (π ≈ 3.14159)
+
+-- 🔹 5️⃣ What is the purpose of the INSERT statement here?
+--     ➤ To store each radius and its corresponding calculated area into the table.
+
+-- 🔹 6️⃣ What happens if you call the procedure again?
+--     ➤ It inserts the same set of radius–area pairs again (duplicates).
+
+-- 🔹 7️⃣ How to avoid duplicates?
+--     ➤ You can TRUNCATE the table before calling the procedure again.
+
+-- 🔹 8️⃣ Example Output:
+--     +--------+--------+
+--     | radius | area   |
+--     +--------+--------+
+--     |   5.00 |  78.54 |
+--     |   6.00 | 113.10 |
+--     |   7.00 | 153.94 |
+--     |   8.00 | 201.06 |
+--     |   9.00 | 254.47 |
+--     +--------+--------+
+
+-- 🔹 9️⃣ Real-Life Use:
+--     ➤ Similar logic can be used for automated table generation in scientific calculations, geometry tools, etc.
+-- -----------------------------------------------------------------
+
+
+
+ass5 - PLSQL GRADING
+-----------------------------------------------------------------------
+CREATE DATABASE IF NOT EXISTS ass5;
+USE ass5;
+
+CREATE TABLE Stud_Marks (
+    name VARCHAR(100),
+    total_marks INT
+);
+
+CREATE TABLE Result (
+    Roll INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(100),
+    Class VARCHAR(50)
+);
+
+DELIMITER //
+
+CREATE FUNCTION Grade_Categorization (marks INT) 
+RETURNS VARCHAR(50)
+DETERMINISTIC
+BEGIN
+    DECLARE grade VARCHAR(50);
+
+    -- User-defined exception for invalid marks
+    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid Marks Value';
+
+    -- Validate marks range
+    IF marks < 0 OR marks > 1500 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Marks must be between 0 and 1500';
+    END IF;
+
+    -- Categorize grade based on marks
+    IF marks >= 990 AND marks <= 1500 THEN
+        SET grade = 'Distinction';
+    ELSEIF marks >= 900 AND marks <= 989 THEN
+        SET grade = 'First Class';
+    ELSEIF marks >= 825 AND marks <= 899 THEN
+        SET grade = 'Higher Second Class';
+    ELSE
+        SET grade = 'Not Categorized';
+    END IF;
+
+    RETURN grade;
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE PROCEDURE proc_Grade()
+BEGIN
+    DECLARE done INT DEFAULT 0;
+    DECLARE v_name VARCHAR(100);
+    DECLARE v_total_marks INT;
+    DECLARE v_grade VARCHAR(50);
+
+    -- Declare cursor to iterate through student marks table
+    DECLARE student_cursor CURSOR FOR 
+        SELECT name, total_marks FROM Stud_Marks;
+
+    -- Handler for end of records
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    -- Handler for SQL exceptions
+    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error occurred during procedure execution';
+
+    -- Open cursor
+    OPEN student_cursor;
+
+    -- Loop through each record
+    read_loop: LOOP
+        FETCH student_cursor INTO v_name, v_total_marks;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Call the function for grade categorization
+        BEGIN
+            DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+                SET v_grade = 'Error in Grade Categorization';
+            SET v_grade = Grade_Categorization(v_total_marks);
+        END;
+
+        -- Insert results into table
+        INSERT INTO Result (Name, Class) VALUES (v_name, v_grade);
+    END LOOP;
+
+    -- Close cursor after processing
+    CLOSE student_cursor;
+
+    -- Commit changes
+    COMMIT;
+END //
+
+DELIMITER ;
+
+INSERT INTO Stud_Marks (name, total_marks) 
+VALUES 
+    ('Aarav', 1200),
+    ('Isha', 950),
+    ('Ravi', 880),
+    ('Priya', 800);
+
+CALL proc_Grade();
+
+SELECT * FROM Result;
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- ------------------------------------------------------------------
+-- 💬 VIVA QUESTIONS AND ANSWERS
+-- ------------------------------------------------------------------
+-- 🔹 1️⃣ What is a Function in MySQL?
+--     ➤ A function is a stored program that returns a single value and can be called inside SQL queries.
+--
+-- 🔹 2️⃣ What is a Stored Procedure?
+--     ➤ A stored procedure is a group of SQL statements executed as a block. It can perform actions and doesn’t need to return a value.
+--
+-- 🔹 3️⃣ What is the difference between FUNCTION and PROCEDURE?
+--     ➤ Function returns a value and can be used inside SELECT, Procedure performs tasks and uses CALL to execute.
+--
+-- 🔹 4️⃣ What is a Cursor?
+--     ➤ A cursor allows row-by-row processing of query results, used here to loop through all students.
+--
+-- 🔹 5️⃣ What is DETERMINISTIC in a function?
+--     ➤ It means the function always returns the same result for the same input.
+--
+-- 🔹 6️⃣ What is a HANDLER?
+--     ➤ A HANDLER manages exceptions (like NOT FOUND or SQL errors) to prevent abrupt termination.
+--
+-- 🔹 7️⃣ Why use COMMIT at the end?
+--     ➤ COMMIT saves the inserted data permanently after the procedure completes.
+--
+-- 🔹 8️⃣ Why is Grade_Categorization called inside a procedure?
+--     ➤ Because each student’s grade is determined dynamically, so we call the function in the loop.
+--
+-- 🔹 9️⃣ What happens if marks > 1500 or < 0?
+--     ➤ A user-defined exception is triggered using SIGNAL, preventing invalid input.
+--
+-- 🔹 🔟 How can you extend this program?
+--     ➤ Add more grade ranges, handle GPA conversion, or store results for multiple semesters.
+--
+-- 🔹 1️⃣1️⃣ What is SIGNAL SQLSTATE?
+--     ➤ It’s used to raise custom error messages during procedure or function execution.
+--
+-- 🔹 1️⃣2️⃣ Why do we need a Cursor here?
+--     ➤ To iterate through all rows of Stud_Marks one by one and insert categorized grades accordingly.
+--
+-- 🔹 1️⃣3️⃣ Real-life application:
+--     ➤ Used in universities or institutes to automatically classify student results into grade bands.
+--
+-- 🔹 1️⃣4️⃣ What does "CONTINUE HANDLER FOR NOT FOUND" do?
+--     ➤ It sets the variable “done” when no more rows exist, gracefully ending the loop.
+--
+-- 🔹 1️⃣5️⃣ Can we call this procedure again after adding new data?
+--     ➤ Yes, simply insert new records into Stud_Marks and call `CALL proc_Grade();` again.
+-- ------------------------------------------------------------------
+
+
+ass6 - CURSOR 
+
+-----------------------------------------------------------------------
+
+
+CREATE DATABASE IF NOT EXISTS ass6;
+
+USE ass6;
+
+DROP TABLE IF EXISTS O_RollCall;
+DROP TABLE IF EXISTS N_RollCall;
+
+CREATE TABLE O_RollCall (
+    id INT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    roll_call_date DATE NOT NULL
+);
+CREATE TABLE N_RollCall (
+    id INT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    roll_call_date DATE NOT NULL
+);
+
+INSERT INTO N_RollCall (id, name, roll_call_date)
+VALUES 
+    (1, 'Amit', '2025-08-01'),
+    (2, 'Priya', '2025-08-02'),
+    (3, 'Rahul', '2025-08-03'),
+    (4, 'Sanya', '2025-08-04'),
+    (5, 'Vikram', '2025-08-05'),
+    (6, 'Neha', '2025-08-06'),
+    (7, 'Arjun', '2025-08-07'),
+    (8, 'Kavita', '2025-08-08');
+
+INSERT INTO O_RollCall VALUES (11, 'Sagar', '2005-08-22');
+
+DELIMITER $$
+
+CREATE PROCEDURE MergeRollCallData()
+BEGIN
+    -- Declare local variables
+    DECLARE done INT DEFAULT 0;
+    DECLARE n_id INT;
+    DECLARE n_name VARCHAR(255);
+    DECLARE n_date DATE;
+
+    -- Declare cursor to read all rows from N_RollCall
+    DECLARE cur CURSOR FOR
+        SELECT id, name, roll_call_date FROM N_RollCall;
+
+    -- Handler to detect end of data
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    -- Open the cursor
+    OPEN cur;
+
+    -- Loop through all rows from new table
+    read_loop: LOOP
+        FETCH cur INTO n_id, n_name, n_date;
+
+        -- Exit when all rows are processed
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Check if record exists in old table before inserting
+        IF NOT EXISTS (
+            SELECT 1 
+            FROM O_RollCall 
+            WHERE id = n_id 
+              AND name = n_name 
+              AND roll_call_date = n_date
+        ) THEN
+            INSERT INTO O_RollCall (id, name, roll_call_date)
+            VALUES (n_id, n_name, n_date);
+        END IF;
+    END LOOP;
+
+    -- Close cursor after completion
+    CLOSE cur;
+END $$
+
+DELIMITER ;
+
+
+CALL MergeRollCallData();
+
+SELECT * FROM O_RollCall;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- ------------------------------------------------------------------
+-- 💬 Viva Preparation Notes
+-- ------------------------------------------------------------------
+-- 🔹 1️⃣ What is a Stored Procedure?
+--     ➤ A stored procedure is a set of SQL statements stored in the database
+--       that can be reused and executed as a single unit.
+--
+-- 🔹 2️⃣ What is a Cursor in MySQL?
+--     ➤ A cursor allows row-by-row processing of query results, used inside 
+--       stored procedures when we need to perform operations on each record.
+--
+-- 🔹 3️⃣ Why do we use a CONTINUE HANDLER?
+--     ➤ It handles runtime conditions or exceptions, such as the "NOT FOUND" 
+--       condition when a cursor reaches the end of its records.
+--
+-- 🔹 4️⃣ Why do we use IF NOT EXISTS?
+--     ➤ To prevent duplicate entries while merging data.
+--
+-- 🔹 5️⃣ What is the role of DELIMITER?
+--     ➤ DELIMITER changes the command-ending symbol from ";" to "$$"
+--       so MySQL can treat the entire procedure body as one unit.
+--
+-- 🔹 6️⃣ Difference between PROCEDURE and FUNCTION?
+--     ➤ A FUNCTION returns a single value and can be used inside queries,
+--       whereas a PROCEDURE performs tasks and is executed using CALL.
+--
+-- 🔹 7️⃣ Why do we use LOOP in stored procedures?
+--     ➤ LOOP allows repeated execution of SQL statements until a condition is met.
+--
+-- 🔹 8️⃣ What is the purpose of the CURSOR here?
+--     ➤ The cursor reads each record from the new roll call table (N_RollCall)
+--       one by one and checks if it already exists in the old table.
+--
+-- 🔹 9️⃣ What happens if we remove the HANDLER?
+--     ➤ Without it, the procedure would throw an error when the cursor reaches
+--       the last record, stopping execution abruptly.
+--
+-- 🔹 🔟 How can you modify this code to update existing records?
+--     ➤ Add an UPDATE statement inside the loop with a condition on ID.
+--
+-- 🔹 1️⃣1️⃣ Difference between DECLARE and SET?
+--     ➤ DECLARE is used to define a variable, while SET is used to assign a value.
+--
+-- 🔹 1️⃣2️⃣ What happens if the same ID appears in both tables?
+--     ➤ The procedure will skip insertion (due to IF NOT EXISTS) — avoiding duplicates.
+--
+-- 🔹 1️⃣3️⃣ What is the advantage of using stored procedures?
+--     ➤ Reusability, better performance, reduced network traffic, and security.
+--
+-- 🔹 1️⃣4️⃣ Can we call a stored procedure from another procedure?
+--     ➤ Yes, nested procedure calls are allowed in MySQL.
+--
+-- 🔹 1️⃣5️⃣ What are real-life examples of cursors?
+--     ➤ Payroll processing, student result updates, or data migration tasks where
+--       record-by-record logic is needed.
+--
+
+
+
+ass7 - TRIGGER AUIDT LIBRARY
+
+
+-----------------------------------------------------------------------
+
+
+
+CREATE DATABASE IF NOT EXISTS trigger_audit_db;
+USE trigger_audit_db;
+-- Create main table to store library books
+CREATE TABLE library (
+    library_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL
+);
+
+-- Create audit table to store history of updates and deletions
+CREATE TABLE library_audit (
+    audit_id INT AUTO_INCREMENT PRIMARY KEY,
+    action_type ENUM('update', 'delete') NOT NULL,
+    library_id INT NOT NULL,
+    old_title VARCHAR(255),
+    action_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Trigger: Before Update (logs the old title before any modification)
+DELIMITER //
+CREATE TRIGGER before_library_update
+BEFORE UPDATE ON library
+FOR EACH ROW
+BEGIN
+    -- Insert old record data into audit table before updating
+    INSERT INTO library_audit (action_type, library_id, old_title)
+    VALUES ('update', OLD.library_id, OLD.title);
+END //
+DELIMITER ;
+
+-- Trigger: Before Delete (logs the old title before deletion)
+DELIMITER //
+CREATE TRIGGER before_library_delete
+BEFORE DELETE ON library
+FOR EACH ROW
+BEGIN
+    -- Insert old record data into audit table before deletion
+    INSERT INTO library_audit (action_type, library_id, old_title)
+    VALUES ('delete', OLD.library_id, OLD.title);
+END //
+DELIMITER ;
+
+-- Insert a sample record
+INSERT INTO library (title)
+VALUES ('to kill a mockingbird');
+
+-- Update record to fire BEFORE UPDATE trigger
+UPDATE library
+SET title = '1984'
+WHERE title = 'to kill a mockingbird';
+
+-- Delete record to fire BEFORE DELETE trigger
+DELETE FROM library
+WHERE title = '1984';
+
+-- Display log entries from the audit table
+SELECT * FROM library_audit;
+
+-- -------------------------------------------------------------
+-- 📘 VIVA / REPORT COMMENTS
+-- -------------------------------------------------------------
+-- 🔹 TOPIC: Trigger-Based Audit System in MySQL
+--
+-- 🔹 WHAT IS A TRIGGER?
+--      ▪ A Trigger in MySQL is a database object that is automatically
+--        executed (or fired) when a specific event occurs on a table.
+--      ▪ Events can be INSERT, UPDATE, or DELETE.
+--      ▪ Triggers help in automating tasks such as validation, logging,
+--        auditing, or enforcing business rules.
+--
+-- 🔹 TYPES OF TRIGGERS:
+--      ▪ BEFORE Trigger → Executes before the action (used here).
+--      ▪ AFTER Trigger  → Executes after the action is completed.
+--
+-- 🔹 PURPOSE OF THIS PROGRAM:
+--      ▪ To automatically record all updates and deletions made to the
+--        'library' table into the 'library_audit' table.
+--
+-- 🔹 WORKING:
+--      1️⃣ When a book title is updated, BEFORE UPDATE trigger fires.
+--      2️⃣ When a book record is deleted, BEFORE DELETE trigger fires.
+--      3️⃣ The triggers insert the old title and its details into 'library_audit'.
+--
+-- 🔹 IMPORTANT KEYWORDS:
+--      ▪ OLD → Refers to the existing data before the change.
+--      ▪ ENUM → Restricts action type to fixed values ('update', 'delete').
+--      ▪ TIMESTAMP → Automatically records the date and time of change.
+--
+-- 🔹 ADVANTAGES OF USING TRIGGERS:
+--      ▪ Maintains automatic history of changes (auditing).
+--      ▪ Improves data security and accountability.
+--      ▪ Reduces manual coding of repetitive tasks.
+--
+-- 🔹 REAL-LIFE APPLICATIONS:
+--      ▪ Banking systems (track balance updates)
+--      ▪ Library management (track issued/returned books)
+--      ▪ Employee systems (track salary or promotion updates)
+--
+-- 🔹 EXPECTED OUTPUT (for demonstration):
+--      +----------+-------------+------------+-----------------------+---------------------+
+--      | audit_id | action_type | library_id | old_title             | action_time         |
+--      +----------+-------------+------------+-----------------------+---------------------+
+--      |        1 | update      |          1 | to kill a mockingbird | 2025-09-02 11:23:19 |
+--      |        2 | delete      |          1 | 1984                  | 2025-09-02 11:23:24 |
+--      +----------+-------------+------------+-----------------------+---------------------+
+--
+-- 🔹 VIVA TIP (Short Answer):
+--      “A trigger is an automatic piece of code that runs in response to
+--       events like INSERT, UPDATE, or DELETE on a table. In this example,
+--       the trigger helps maintain an audit log of all book changes in the
+--       library table without needing manual effort.”
+-- -------------------------------------------------------------
+
+
+
+
+ass8-  MYSQL CONNECTIVITY
+
+-----------------------------------------------------------------------
+
+
+pip3 install flask
+
+-----------------------------------------------------------------------
+
+pip3 install Flask-CORS
+
+
+-----------------------------------------------------------------------
+pip3 install mysql-connector-python
+
+
+-----------------------------------------------------------------------
+
+index.html – 
+
+-----------------------------------------------------------------------
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Records</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-4">
+    <h2>Student List</h2>
+    <a href="/add" class="btn btn-success mb-3">Add Student</a>
+    <table class="table table-bordered">
+        <tr>
+            <th>ID</th><th>Name</th><th>Email</th><th>Actions</th>
+        </tr>
+        {% for student in students %}
+        <tr>
+            <td>{{ student[0] }}</td>
+            <td>{{ student[1] }}</td>
+            <td>{{ student[2] }}</td>
+            <td>
+                <a href="/edit/{{ student[0] }}" class="btn btn-primary btn-sm">Edit</a>
+                <a href="/delete/{{ student[0] }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
+-----------------------------------------------------------------------
+
+
+
+
+form.html
+
+-----------------------------------------------------------------------
+    <!DOCTYPE html>
+<html>
+<head>
+    <title>
+        {% if student %}
+            Edit Student
+        {% else %}
+            Add Student
+        {% endif %}
+    </title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-4">
+
+    {% if student %}
+    
+    <h2>Edit Student</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label>Name:</label>
+            <input type="text" name="name" class="form-control" value="{{ student[1] }}" required>
+        </div>
+        <div class="mb-3">
+            <label>Email:</label>
+            <input type="email" name="email" class="form-control" value="{{ student[2] }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+        <a href="/" class="btn btn-secondary">Cancel</a>
+    </form>
+    
+    {% else %}
+    
+    <h2>Add Student</h2>
+    <form method="POST" action="/add">
+        <div class="mb-3">
+            <label>Name:</label>
+            <input type="text" name="name" class="form-control" value="" required>
+        </div>
+        <div class="mb-3">
+            <label>Email:</label>
+            <input type="email" name="email" class="form-control" value="" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Add</button>
+        <a href="/" class="btn btn-secondary">Cancel</a>
+    </form>
+    
+    {% endif %}
+
+</body>
+</html>
+
+-----------------------------------------------------------------------
+
+app.py
+-----------------------------------------------------------------------
+
+from flask import Flask, request, render_template, redirect, url_for
+import mysql.connector
+import sys
+
+app = Flask(__name__)
+
+# --- Database Configuration ---
+# Uses the same password and user from your example
+# NOTE: The database is changed to 'student_db'
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'NopeMysql99@@',
+    'database': 'student_db'  # Database for this student project
+}
+
+def get_db_connection():
+    """Establishes a connection to the MySQL database."""
+    try:
+        conn = mysql.connector.connect(**db_config)
+        return conn
+    except mysql.connector.Error as err:
+        print(f"Database connection failed: {err}")
+        print("---")
+        print("Have you created the 'student_db' database and the 'students' table?")
+        print("See the SQL setup instructions in the terminal.")
+        print("---")
+        return None
+
+@app.route('/')
+def index():
+    """Renders the main page with a list of all students."""
+    conn = get_db_connection()
+    if conn is None:
+        return "Database connection failed. Check terminal.", 500
+        
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM students ORDER BY id ASC")
+    students = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    # Renders the 'index.html' template
+    return render_template('index.html', students=students)
+
+@app.route('/add', methods=['GET', 'POST'])
+def add_student():
+    """Handles both showing the 'add' form and processing the new student data."""
+    if request.method == 'POST':
+        # Process the form data
+        name = request.form['name']
+        email = request.form['email']
+        
+        conn = get_db_connection()
+        if conn is None:
+            return "Database connection failed. Check terminal.", 500
+            
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO students (name, email) VALUES (%s, %s)", (name, email))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return redirect(url_for('index'))
+
+    # For GET request, just show the form
+    # Renders 'form.html' with no student data
+    return render_template('form.html', student=None)
+
+@app.route('/edit/<int:id>', methods=['GET', 'POST'])
+def edit_student(id):
+    """Handles both showing the 'edit' form and processing the updated student data."""
+    conn = get_db_connection()
+    if conn is None:
+        return "Database connection failed. Check terminal.", 500
+        
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+        # Process the updated form data
+        name = request.form['name']
+        email = request.form['email']
+        
+        cursor.execute("UPDATE students SET name = %s, email = %s WHERE id = %s", (name, email, id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return redirect(url_for('index'))
+
+    # For GET request, fetch the student and show the form
+    cursor.execute("SELECT * FROM students WHERE id = %s", (id,))
+    student = cursor.fetchone() # Fetches as a tuple (id, name, email)
+    cursor.close()
+    conn.close()
+    
+    if student:
+        # Renders 'add_edit.html' and passes the student tuple to it
+        return render_template('form.html', student=student)
+    else:
+        return "Student not found", 404
+
+@app.route('/delete/<int:id>')
+def delete_student(id):
+    """Deletes a student based on their ID."""
+    conn = get_db_connection()
+    if conn is None:
+        return "Database connection failed. Check terminal.", 500
+        
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM students WHERE id = %s", (id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+    return redirect(url_for('index'))
+
+def setup_database():
+    """Checks for database and table, creates them if not present."""
+    try:
+        # Connect without specifying a database
+        conn = mysql.connector.connect(
+            host=db_config['host'],
+            user=db_config['user'],
+            password=db_config['password']
+        )
+        cursor = conn.cursor()
+        
+        # Create database if it doesn't exist
+        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {db_config['database']}")
+        print(f"Database '{db_config['database']}' ensured.")
+        
+        # Switch to the database
+        cursor.execute(f"USE {db_config['database']}")
+        
+        # Create table if it doesn't exist
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS students (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) NOT NULL
+            )
+        """)
+        print("Table 'students' ensured.")
+        
+        cursor.close()
+        conn.close()
+        return True
+        
+    except mysql.connector.Error as err:
+        print(f"\n--- DATABASE SETUP FAILED ---")
+        print(f"Error: {err}")
+        print("Please ensure your MySQL server is running and the credentials are correct.")
+        return False
+
+if __name__ == '__main__':
+    print("--- Student Record Server (MySQL - CRUD Enabled) ---")
+    
+    # Try to set up the database and table first
+    if setup_database():
+        print(f"Database connection to '{db_config['database']}' successful!")
+        print(f"Starting server...")
+        print(f"Access the website at: http://localhost:5000")
+        app.run(host='localhost', port=5000, debug=True)
+    else:
+        print("\n--- SERVER CANNOT START ---")
+        print("Could not connect to or set up the MySQL database.")
+        sys.exit(1)
+
+-----------------------------------------------------------------------
+
+to run – go to directory of the python file and open cmd
+type python3 app.py  
+-----------------------------------------------------------------------
+
+
+
+
+ass9 - CRUD MONGO
+
+-----------------------------------------------------------------------
+use sagar_ass9
+
+db.createCollection("student")
+
+db.student.insertMany([
+  { name: "Ram", rollNo: 101, marks: 85, CGPA: 9.2, branch: "Computer Science", nativeCity: "Delhi" },
+  { name: "Sita", rollNo: 102, marks: 88, CGPA: 8.6, branch: "IT", nativeCity: "Mumbai" },
+  { name: "Shyam", rollNo: 103, marks: 75, CGPA: 7.9, branch: "Electrical", nativeCity: "Kolkata" },
+  { name: "Ravi", rollNo: 104, marks: 90, CGPA: 9.5, branch: "Computer Science", nativeCity: "Bangalore" },
+  { name: "Priya", rollNo: 105, marks: 80, CGPA: 8.2, branch: "Electronics", nativeCity: "Chennai" },
+  { name: "Amit", rollNo: 106, marks: 95, CGPA: 9.8, branch: "Computer Science", nativeCity: "Delhi" },
+  { name: "Geeta", rollNo: 107, marks: 78, CGPA: 8.0, branch: "Civil", nativeCity: "Hyderabad" }
+])
+
+db.student.find().pretty()
+
+db.student.updateOne(
+  { name: "Ram" },
+  { $set: { marks: 90 } }
+)
+
+db.student.find({
+  $or: [{ CGPA: { $gte: 9 } }, { branch: "Computer Science" }]
+}).pretty()
+
+db.student.find({ branch: { $ne: "IT" } }).pretty()
+
+db.student.find({ CGPA: 7, nativeCity: "Mumbai" }).pretty()
+
+db.student.find({
+  $nor: [{ CGPA: { $eq: 9 } }, { branch: "Computer Science" }]
+}).pretty()
+
+db.student.save({
+  name: "Nisha",
+  rollNo: 108,
+  marks: 88,
+  CGPA: 8.1,
+  branch: "Computer Science",
+  nativeCity: "Mumbai"
+})
+db.student.find().pretty()
+
+db.student.deleteOne({ name: "Sita" })
+
+db.student.find({ branch: "Computer Science" }).sort({ CGPA: -1 }).limit(1).pretty()
+
+
+
+
+
+
+
+
+
+// -------------------------------------------------------------
+// 📘 ADDITIONAL NOTES & COMMENTS (FOR VIVA / REPORT)
+// -------------------------------------------------------------
+//
+// 🔹 DATABASE NAME: sagar_ass9
+// 🔹 COLLECTION NAME: student
+// 🔹 NUMBER OF DOCUMENTS: 7 (initially), then +1 added (Nisha), -1 deleted (Sita)
+//
+// -------------------------------------------------------------
+// 🔹 PURPOSE:
+// This practical demonstrates how to perform all major CRUD operations 
+// (Create, Read, Update, Delete) in MongoDB along with the use of logical operators.
+// -------------------------------------------------------------
+//
+// 🔹 CRUD OPERATIONS USED:
+// ▪ CREATE → insertMany(), save()
+// ▪ READ → find(), find().pretty()
+// ▪ UPDATE → updateOne()
+// ▪ DELETE → deleteOne()
+//
+// -------------------------------------------------------------
+// 🔹 QUERY OPERATORS USED:
+// ▪ $or  → Combine multiple conditions (logical OR)
+// ▪ $ne  → Not equal to
+// ▪ $gte → Greater than or equal to
+// ▪ $nor → Negation of multiple conditions
+//
+// -------------------------------------------------------------
+// 🔹 AGGREGATE FEATURES USED:
+// ▪ sort({ field: -1 }) → Sort descending (highest CGPA first)
+// ▪ limit(1) → Restrict output to one document
+//
+// -------------------------------------------------------------
+// 🔹 SAMPLE OUTPUT EXPECTED:
+//
+// ➤ db.student.find().pretty()
+// { name: "Ram", rollNo: 101, marks: 90, CGPA: 9.2, branch: "Computer Science", nativeCity: "Delhi" }
+// { name: "Amit", rollNo: 106, marks: 95, CGPA: 9.8, branch: "Computer Science", nativeCity: "Delhi" }
+// ...
+//
+// ➤ db.student.find({ branch: "Computer Science" }).sort({ CGPA: -1 }).limit(1)
+// { name: "Amit", rollNo: 106, marks: 95, CGPA: 9.8, branch: "Computer Science", nativeCity: "Delhi" }
+//
+// -------------------------------------------------------------
+// 🔹 VIVA SHORT ANSWERS:
+//
+// Q1️⃣: What is MongoDB?
+// ➤ MongoDB is a NoSQL, document-oriented database that stores data in JSON-like BSON format.
+//
+// Q2️⃣: What is a collection?
+// ➤ A collection in MongoDB is similar to a table in SQL. It stores multiple documents.
+//
+// Q3️⃣: What are CRUD operations?
+// ➤ CRUD stands for Create, Read, Update, and Delete — the four basic database operations.
+//
+// Q4️⃣: Difference between find() and pretty()?
+// ➤ find() shows raw JSON; pretty() displays formatted and indented results.
+//
+// Q5️⃣: How is data sorted in MongoDB?
+// ➤ Using sort({ field: 1 }) for ascending and sort({ field: -1 }) for descending order.
+//
+// Q6️⃣: Why use $or and $nor operators?
+// ➤ $or finds documents matching at least one condition,
+//    while $nor excludes documents matching any of the listed conditions.
+//
+// Q7️⃣: What does save() do in MongoDB?
+// ➤ save() either inserts a new document or updates an existing one if _id already exists.
+//
+// -------------------------------------------------------------
+// 🔹 REAL-LIFE APPLICATION EXAMPLE:
+// ▪ Used in student record management systems to store marks, CGPA, and course details.
+// ▪ MongoDB allows flexible schema, making it ideal for college data, e-commerce, or IoT apps.
+//
+// -------------------------------------------------------------
+// 🔹 CONCLUSION:
+// This assignment demonstrates efficient data handling in MongoDB using shell commands,
+// showing how NoSQL databases provide flexible and schema-free document storage with
+// simple yet powerful query syntax.
+
+
+
+ass10- INDEX / AGGREGATE
+
+
+-----------------------------------------------------------------------
+
+
+
+use ass10
+
+db.students.drop()
+
+db.students.insertMany([
+  { _id: 1, name: "Amit", age: 15, marks: 85, city: "Delhi" },
+  { _id: 2, name: "Priya", age: 14, marks: 90, city: "Mumbai" },
+  { _id: 3, name: "Ravi", age: 16, marks: 78, city: "Kolkata" },
+  { _id: 4, name: "Simran", age: 17, marks: 88, city: "Bangalore" },
+  { _id: 5, name: "Arjun", age: 15, marks: 92, city: "Delhi" },
+  { _id: 6, name: "Meera", age: 16, marks: 81, city: "Mumbai" },
+  { _id: 7, name: "Karan", age: 17, marks: 75, city: "Kolkata" },
+  { _id: 8, name: "Sonia", age: 14, marks: 95, city: "Bangalore" },
+  { _id: 9, name: "Vikram", age: 16, marks: 80, city: "Chennai" },
+  { _id: 10, name: "Anjali", age: 15, marks: 89, city: "Chennai" }
+])
+
+db.students.createIndex({ city: 1 })
+
+db.students.find().pretty()
+
+db.students.aggregate([
+  {
+    $group: {
+      _id: null,
+      averageMarks: { $avg: "$marks" }
+    }
+  }
+])
+
+db.students.aggregate([
+  {
+    $group: {
+      _id: "$city",
+      totalStudents: { $sum: 1 }
+    }
+  }
+])
+
+db.students.aggregate([
+  { $sort: { marks: -1 } }
+])
+
+db.students.aggregate([
+  {
+    $match: { city: { $in: ["Delhi", "Mumbai"] } }
+  },
+  {
+    $group: {
+      _id: "$city",
+      averageMarks: { $avg: "$marks" }
+    }
+  }
+])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// -------------------------------------------------------------
+// 📘 COMMENT SECTION (FOR REPORT / VIVA)
+// -------------------------------------------------------------
+//
+// 🔹 DATABASE USED: sagar_ass10
+// 🔹 COLLECTION: students
+// 🔹 NUMBER OF RECORDS: 4
+//
+// -------------------------------------------------------------
+// 🔹 OBJECTIVE:
+// To understand MongoDB’s aggregation framework and how indexes
+// can improve query performance.
+// -------------------------------------------------------------
+//
+// 🔹 AGGREGATE OPERATORS USED:
+// ▪ $group → Groups documents and performs aggregate functions (like $sum, $avg)
+// ▪ $avg → Calculates average value
+// ▪ $sum → Counts or totals documents
+// ▪ $sort → Orders results
+// ▪ $match → Filters documents before grouping
+//
+// -------------------------------------------------------------
+// 🔹 INDEX USED:
+// ▪ createIndex({ city: 1 }) → Creates ascending index on the 'city' field
+//   Improves search efficiency for city-based queries.
+//
+// -------------------------------------------------------------
+// 🔹 EXPECTED OUTPUT SUMMARY:
+//
+// ➤ Average marks of all students → 85.25
+// ➤ Total students per city → 1 each
+// ➤ Sorted students by marks → Priya (90), Simran (88), Amit (85), Ravi (78)
+// ➤ Average marks per city (Delhi, Mumbai) → Delhi: 85, Mumbai: 90
+//
+// -------------------------------------------------------------
+// 🔹 VIVA SHORT ANSWERS:
+//
+// Q1️⃣: What is aggregation in MongoDB?
+// ➤ Aggregation is a process of transforming and combining data
+//    using operations like $group, $sum, $avg, $sort, etc.
+//
+// Q2️⃣: What is the purpose of $group in aggregation?
+// ➤ $group is used to group documents by a specific field and
+//    perform calculations like sum, average, or count.
+//
+// Q3️⃣: What is the difference between $match and find()?
+// ➤ $match filters data *inside an aggregation pipeline*, while
+//    find() retrieves documents directly.
+//
+// Q4️⃣: What is an index in MongoDB?
+// ➤ An index is a special data structure that improves the speed of
+//    data retrieval operations on a collection.
+//
+// Q5️⃣: How do you check if an index is created?
+// ➤ Run: db.students.getIndexes()
+//
+
+
+ass11- MAP REDUCE
+
+
+
+-----------------------------------------------------------------------
+
+
+
+use 11
+
+db.students.drop()
+db.total_marks_by_city.drop()
+
+db.students.insertMany([
+  { _id: 1, name: "Amit", age: 15, marks: 85, city: "Delhi" },
+  { _id: 2, name: "Priya", age: 14, marks: 90, city: "Mumbai" },
+  { _id: 3, name: "Ravi", age: 16, marks: 78, city: "Kolkata" },
+  { _id: 4, name: "Simran", age: 17, marks: 88, city: "Bangalore" },
+  { _id: 5, name: "Arjun", age: 15, marks: 92, city: "Delhi" },
+  { _id: 6, name: "Meera", age: 16, marks: 81, city: "Mumbai" },
+  { _id: 7, name: "Karan", age: 17, marks: 75, city: "Kolkata" },
+  { _id: 8, name: "Sonia", age: 14, marks: 95, city: "Bangalore" },
+  { _id: 9, name: "Vikram", age: 16, marks: 80, city: "Delhi" },
+  { _id: 10, name: "Anjali", age: 15, marks: 89, city: "Mumbai" }
+])
+
+var mapFunction = function() {
+  emit(this.city, this.marks);
+};
+
+var reduceFunction = function(key, values) {
+  return Array.sum(values);
+};
+
+db.students.mapReduce(
+  mapFunction,
+  reduceFunction,
+  {
+    out: "total_marks_by_city"
+  }
+)
+
+db.total_marks_by_city.find().pretty()
+
+var finalizeFunction = function(key, reducedValue) {
+  var output = {
+    city: key,
+    total_marks: reducedValue
+  };
+  return output;
+};
+
+
+db.total_marks_by_city.find().pretty()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// -------------------------------------------------------------
+// 🧩 COMMENT SECTION (for report / viva)
+// -------------------------------------------------------------
+//
+// 🔹 DATABASE USED: sagar_11
+// 🔹 COLLECTION: students
+// 🔹 OUTPUT COLLECTION: total_marks_by_city
+//
+// -------------------------------------------------------------
+// 🔹 MAP FUNCTION:
+//   Emits key-value pairs, with each student's city as key and marks as value.
+//
+// 🔹 REDUCE FUNCTION:
+//   Receives city as key and all marks as values array, then returns their sum.
+//
+// 🔹 FINALIZE FUNCTION:
+//   (Optional) Processes the reduced result before output.
+//
+// -------------------------------------------------------------
+// 🔹 EXPECTED OUTPUT SUMMARY:
+//   Bangalore → 88
+//   Delhi     → 85
+//   Kolkata   → 78
+//   Mumbai    → 90
+//
+// -------------------------------------------------------------
+// 🔹 VIVA SHORT ANSWERS:
+//
+// Q1️⃣: What is MapReduce in MongoDB?
+// ➤ MapReduce is a data processing paradigm used to perform
+//    large-scale aggregation by mapping documents and reducing results.
+//
+// Q2️⃣: What do `map()` and `reduce()` do?
+// ➤ `map()` emits key-value pairs.
+// ➤ `reduce()` processes those pairs to combine values for each key.
+//
+// Q3️⃣: What is the use of `emit()`?
+// ➤ It sends a key-value pair from the map function to the reduce phase.
+//
+// Q4️⃣: When do we use MapReduce instead of Aggregation?
+// ➤ MapReduce is preferred for very large datasets or when custom
+//    JavaScript logic is needed during aggregation.
+//
+// Q5️⃣: What is the `finalize` function used for?
+// ➤ It modifies the result after reduction, e.g., formatting or rounding values.
+//
+// -------------------------------------------------------------
+// 🔹 CONCLUSION:
+// This program demonstrates how MapReduce can be used to process and
+// summarize large amounts of data in MongoDB efficiently. It performs
+// city-wise total marks calculation using map, reduce, and finalize stages.
+// -------------------------------------------------------------
+

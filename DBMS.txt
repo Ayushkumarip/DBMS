@@ -1,0 +1,1014 @@
+Ass - 2
+
+-- 1. Create the Departments table
+CREATE TABLE Departments (
+    dept_id INT PRIMARY KEY,
+    Dept_name VARCHAR(100) NOT NULL
+);
+
+-- 2. Create the Employees table
+CREATE TABLE Employees (
+    emp_id INT PRIMARY KEY,
+    emp_name VARCHAR(100),
+    salary INT,
+    dept_id INT,
+    -- Creates a relationship between the tables
+    FOREIGN KEY (dept_id) REFERENCES Departments(dept_id)
+);
+
+-- 3. Insert data into Departments (must be done first)
+INSERT INTO Departments (dept_id, Dept_name) VALUES
+(1, 'Administration'),
+(2, 'Customer Service'),
+(3, 'Finance'),
+(4, 'Human Resources'),
+(5, 'Sales');
+
+-- 4. Insert data into Employees
+INSERT INTO Employees (emp_id, emp_name, salary, dept_id) VALUES
+(1, 'Ethan Hunt', 5000, 4),
+(2, 'Tony Montana', 6500, 1),
+(3, 'Sarah Connor', 8000, 5),
+(4, 'Rick Deckard', 7200, 3),
+(5, 'Martin Blank', 5600, NULL);
+
+VIEW 
+
+CREATE VIEW v_EmployeeDetails AS
+SELECT 
+    e.emp_id, 
+    e.emp_name, 
+    e.salary, 
+    d.Dept_name
+FROM 
+    Employees e
+LEFT JOIN 
+    Departments d ON e.dept_id = d.dept_id;
+
+-- You can query this view just like a table:
+-- SELECT * FROM v_EmployeeDetails;
+
+INDEX
+
+CREATE INDEX idx_emp_name ON Employees(emp_name);
+
+SEQUENCE
+
+-- Requires MySQL 8.0 or later
+CREATE SEQUENCE my_general_sequence
+    START WITH 100
+    INCREMENT BY 1;
+
+-- To get the next number from the sequence:
+-- SELECT NEXT VALUE FOR my_general_sequence;
+
+
+SELECT t1.emp_id, t1.emp_name, t2.Dept_name
+FROM employees AS t1
+LEFT JOIN departments AS t2 ON t1.dept_id = t2.dept_id;
+
+CREATE VIEW v_EmployeeDept AS
+SELECT 
+    t1.emp_id, 
+    t1.emp_name, 
+    t2.Dept_name
+FROM 
+    employees AS t1
+LEFT JOIN 
+    departments AS t2 ON t1.dept_id = t2.dept_id;
+
+SELECT * FROM v_EmployeeDept;
+
+CREATE OR REPLACE VIEW v_EmployeeDept AS
+SELECT 
+    t1.emp_id, 
+    t1.emp_name, 
+    t2.Dept_name,
+    t1.salary  -- Added the salary column
+FROM 
+    employees AS t1
+LEFT JOIN 
+    departments AS t2 ON t1.dept_id = t2.dept_id;
+
+-- This is the CORRECT way to add the records:
+INSERT INTO Employees (emp_id, emp_name, salary, dept_id) VALUES
+(6, 'Peter Venkman', 6200, 5),  -- Sales
+(7, 'Dana Barrett', 7100, 2),   -- Customer Service
+(8, 'Egon Spengler', 6800, 1);  -- Administration
+
+-- If you run this, you will get an ERROR:
+-- INSERT INTO v_EmployeeDept (emp_id, emp_name, Dept_name, salary) 
+-- VALUES (9, 'New Guy', 'Finance', 5000); 
+-- (ERROR: The target view v_EmployeeDept is not updatable)
+
+UPDATE v_EmployeeDept
+SET salary = 6000 
+WHERE emp_id = 1;
+
+SELECT * FROM v_EmployeeDept 
+WHERE Dept_name IS NULL;
+
+DELETE FROM v_EmployeeDept 
+WHERE Dept_name IS NULL;
+
+DROP VIEW v_EmployeeDept;
+
+
+Part -2 
+
+-- 1. Create the Employee table
+CREATE TABLE Employee (
+    Eid INT PRIMARY KEY,
+    EName VARCHAR(100),
+    Address VARCHAR(100),
+    Salary INT,
+    Commision INT -- Using the spelling from the image
+);
+
+-- 2. Create the Project table
+CREATE TABLE Project (
+    PrNo INT PRIMARY KEY,
+    Addr VARCHAR(100)
+);
+
+-- 3. Insert data into Employee table
+INSERT INTO Employee (Eid, EName, Address, Salary, Commision) VALUES
+(1, 'Amit', 'Pune', 35000, 5000),
+(2, 'Sneha', 'Pune', 35000, NULL),
+(3, 'Savita', 'Nasik', 25000, NULL),
+(4, 'Pooja', 'Nasik', 28000, 2000),
+(5, 'Sagar', 'Mumbai', 19000, NULL),
+(6, 'Rohit', 'Mumbai', 25000, 3000),
+(7, 'Poonam', 'Jaipur', 40000, NULL),
+(8, 'Arjun', 'Patana', 45000, 2000),
+(9, 'Rahul', 'Nagpur', 60000, 5000),
+(10, 'Dulquer', 'Kochi', 30000, 1000);
+
+-- 4. Insert data into Project table
+INSERT INTO Project (PrNo, Addr) VALUES
+(10, 'Mumbai'),
+(20, 'Pune'),
+(30, 'Jalgoan'),
+(40, 'Nagpur'),
+(50, 'Delhi'),
+(60, 'Kochi'),
+(70, 'Pune'),
+(80, 'Nasik');
+
+1 SELECT DISTINCT Address FROM Employee;
+2 SELECT 
+    MAX(Salary) AS MaxSalary, 
+    MIN(Salary) AS MinSalary, 
+    AVG(Salary) AS AvgSalary, 
+    SUM(Salary) AS TotalSalary 
+FROM Employee;
+3 SELECT * FROM Employee ORDER BY Salary ASC;
+4 SELECT EName FROM Employee WHERE Address IN ('Nasik', 'Pune');
+5 SELECT EName FROM Employee WHERE Commision IS NULL;
+6 UPDATE Employee 
+SET Address = 'Nasik' 
+WHERE EName = 'Amit';
+7 SELECT * FROM Employee WHERE EName LIKE 'A%';
+8 SELECT COUNT(*) AS MumbaiStaffCount 
+FROM Employee 
+WHERE Address = 'Mumbai';
+9 SELECT Address, COUNT(*) AS StaffCount 
+FROM Employee 
+GROUP BY Address;
+10 SELECT Address FROM Employee
+UNION
+SELECT Addr FROM Project;
+11 SELECT Address, MIN(Salary) AS MinSalary 
+FROM Employee 
+GROUP BY Address;
+12 SELECT Address, MAX(Salary) AS MaxSalary 
+FROM Employee 
+GROUP BY Address 
+HAVING MAX(Salary) > 26000;
+13 DELETE FROM Employee WHERE Salary > 30000;
+14 DELETE FROM Employees
+WHERE emp_name LIKE 's%';
+15 SELECT *
+FROM Employees
+WHERE city = 'Pune'
+ORDER BY emp_name ASC;
+
+————————————————————————————————
+
+Ass -3 
+
+————————————————————————————————
+
+-- Sector table (must be created first)
+CREATE TABLE Sectors (
+    sector_id INT PRIMARY KEY,
+    sector_name VARCHAR(100)
+);
+
+-- Packages table (references Sectors)
+CREATE TABLE Packages (
+    pack_id INT PRIMARY KEY,
+    speed VARCHAR(50),
+    strt_date DATE,
+    monthly_payment INT,
+    sector_id INT,
+    FOREIGN KEY (sector_id) REFERENCES Sectors(sector_id)
+);
+
+-- Customers table (references Packages)
+CREATE TABLE Customers (
+    cust_id INT PRIMARY KEY,
+    firstname VARCHAR(100),
+    lastname VARCHAR(100),
+    birthdate DATE,
+    joindate DATE,
+    city VARCHAR(100),
+    state VARCHAR(100),
+    street VARCHAR(255),
+    main_phone_num VARCHAR(20),
+    secondary_phn_no VARCHAR(20),
+    fax VARCHAR(20),
+    monthly_discount FLOAT,
+    pack_id INT,
+    FOREIGN KEY (pack_id) REFERENCES Packages(pack_id)
+);
+
+-- Note: The Pack_grades table was not needed for these queries.
+
+— Write a query to display first name, last name, package number and internet speed for all customers.
+
+SELECT 
+    c.firstname, 
+    c.lastname, 
+    p.pack_id, 
+    p.speed
+FROM 
+    Customers c
+JOIN 
+    Packages p ON c.pack_id = p.pack_id;
+
+— Write a query to display first name, last name, package number and internet speed for all customers whose package number equals 22 or 27. Order the query in ascending order by last name.
+
+SELECT 
+    c.firstname, 
+    c.lastname, 
+    p.pack_id, 
+    p.speed
+FROM 
+    Customers c
+JOIN 
+    Packages p ON c.pack_id = p.pack_id
+WHERE 
+    p.pack_id IN (22, 27)
+ORDER BY 
+    c.lastname ASC;
+
+— Display the package number, internet speed, monthly payment and sector name for all packages (Packages and Sectors tables).
+
+SELECT 
+    p.pack_id, 
+    p.speed, 
+    p.monthly_payment, 
+    s.sector_name
+FROM 
+    Packages p
+JOIN 
+    Sectors s ON p.sector_id = s.sector_id;
+
+— Display the customer name, package number, internet speed, monthly payment and sector name for all customers (Customers, Packages and Sectors tables).
+
+SELECT 
+    c.firstname, 
+    c.lastname,
+    p.pack_id, 
+    p.speed, 
+    p.monthly_payment, 
+    s.sector_name
+FROM 
+    Customers c
+JOIN 
+    Packages p ON c.pack_id = p.pack_id
+JOIN 
+    Sectors s ON p.sector_id = s.sector_id;
+
+—Display the customer name, package number, internet speed, monthly payment and sector name for all customers in the business sector (Customers, Packages and Sectors tables).
+
+SELECT 
+    c.firstname, 
+    c.lastname,
+    p.pack_id, 
+    p.speed, 
+    p.monthly_payment, 
+    s.sector_name
+FROM 
+    Customers c
+JOIN 
+    Packages p ON c.pack_id = p.pack_id
+JOIN 
+    Sectors s ON p.sector_id = s.sector_id
+WHERE 
+    s.sector_name = 'Business'; 
+-- Note: The value 'Business' must match the exact data in your Sectors table (it might be 'business' instead).
+
+— Display the last name, first name, join date, package number, internet speed and sector name for all customers in the private sector who joined the company in the year 2006.Display the last name, first name, join date, package number, internet speed and sector name for all customers in the private sector who joined the company in the year 2006.
+
+SELECT 
+    c.lastname, 
+    c.firstname, 
+    c.joindate,
+    p.pack_id, 
+    p.speed, 
+    s.sector_name
+FROM 
+    Customers c
+JOIN 
+    Packages p ON c.pack_id = p.pack_id
+JOIN 
+    Sectors s ON p.sector_id = s.sector_id
+WHERE 
+    s.sector_name = 'Private' 
+    AND YEAR(c.joindate) = 2006;
+-- Note: 'Private' must match the exact data. The YEAR() function extracts the year from the joindate column.
+
+————
+
+CREATE TABLE Pack_Grades (
+    grade_id VARCHAR(1) PRIMARY KEY,
+    grade_name VARCHAR(50),
+    min_price INT,
+    max_price INT
+);
+
+-- Inserting some example data
+INSERT INTO Pack_Grades (grade_id, grade_name, min_price, max_price) VALUES
+('A', 'Premium', 60, 100),
+('B', 'Standard', 40, 59),
+('C', 'Budget', 20, 39);
+
+— Display the package number, internet speed, monthly payment and package grade for all packages whose monthly payment is between min_price and max_price (Packages and Pack_Grades tables).
+
+SELECT 
+    p.pack_id, 
+    p.speed, 
+    p.monthly_payment, 
+    g.grade_name
+FROM 
+    Packages p
+JOIN 
+    Pack_Grades g ON p.monthly_payment BETWEEN g.min_price AND g.max_price;
+
+— Display the first name, last name, internet speed and monthly payment for all customers. Use INNER JOIN to solve this exercise.
+
+SELECT 
+    c.firstname, 
+    c.lastname, 
+    p.speed, 
+    p.monthly_payment
+FROM 
+    Customers c
+INNER JOIN 
+    Packages p ON c.pack_id = p.pack_id;
+
+— Modify last query to display all customers, including those without any internet package.
+
+SELECT 
+    c.firstname, 
+    c.lastname, 
+    p.speed, 
+    p.monthly_payment
+FROM 
+    Customers c
+LEFT JOIN 
+    Packages p ON c.pack_id = p.pack_id;
+
+— Modify last query to display all packages, including those without any customers.
+
+SELECT 
+    c.firstname, 
+    c.lastname, 
+    p.speed, 
+    p.monthly_payment
+FROM 
+    Customers c
+RIGHT JOIN 
+    Packages p ON c.pack_id = p.pack_id;
+
+— Modify last query to display all packages and all customers.
+
+-- MySQL does not have a "FULL OUTER JOIN" command.
+-- You must emulate it by combining a LEFT and RIGHT JOIN with UNION.
+
+(SELECT 
+    c.firstname, 
+    c.lastname, 
+    p.speed, 
+    p.monthly_payment
+ FROM 
+    Customers c
+ LEFT JOIN 
+    Packages p ON c.pack_id = p.pack_id)
+UNION
+(SELECT 
+    c.firstname, 
+    c.lastname, 
+    p.speed, 
+    p.monthly_payment
+ FROM 
+    Customers c
+ RIGHT JOIN 
+    Packages p ON c.pack_id = p.pack_id);
+
+— Display the last name, first name and package number for all customers who have the same package number as customer named 'A Taylor' (Customers table).
+
+SELECT 
+    c2.lastname, 
+    c2.firstname, 
+    c2.pack_id
+FROM 
+    Customers c1
+JOIN 
+    Customers c2 ON c1.pack_id = c2.pack_id
+WHERE 
+    c1.firstname = 'A' AND c1.lastname = 'Taylor'
+    AND c2.cust_id != c1.cust_id; -- Excludes 'A Taylor' from the results
+
+— Display the last name, first name and monthly discount for all customers whose monthly discount is lower than the monthly discount of employee number 103 (Customers table).
+
+SELECT 
+    c2.lastname, 
+    c2.firstname, 
+    c2.monthly_discount
+FROM 
+    Customers c1
+JOIN 
+    Customers c2 ON c2.monthly_discount < c1.monthly_discount
+WHERE 
+    c1.cust_id = 103;
+
+— Display the package number and internet speed for all packages whose internet speed is equal to the internet speed of package number 10 (Packages table).
+
+SELECT 
+    p2.pack_id, 
+    p2.speed
+FROM 
+    Packages p1
+JOIN 
+    Packages p2 ON p1.speed = p2.speed
+WHERE 
+    p1.pack_id = 10
+    AND p2.pack_id != 10; -- Excludes package 10 itself
+
+————————————————————————————————————
+
+Ass - 4
+
+————————————————————————————————————
+
+Library Fine Calculation
+
+CREATE TABLE Borrower (
+    Roll_no INT,
+    Name VARCHAR2(100),
+    DateofIssue DATE,
+    NameofBook VARCHAR2(200),
+    Status CHAR(1) -- 'I' for Issued, 'R' for Returned
+);
+
+CREATE TABLE Fine (
+    Roll_no INT,
+    "Date" DATE,
+    Amt NUMBER
+);
+
+-- Insert some sample data to test
+INSERT INTO Borrower VALUES (101, 'Student A', SYSDATE - 20, 'Database Systems', 'I'); -- 20 days
+INSERT INTO Borrower VALUES (102, 'Student B', SYSDATE - 45, 'Java Programming', 'I'); -- 45 days
+INSERT INTO Borrower VALUES (103, 'Student C', SYSDATE - 10, 'Data Structures', 'I');   -- 10 days
+
+DECLARE
+    -- Variables to hold user input
+    v_roll_no     Borrower.Roll_no%TYPE := &input_roll_no;
+    v_book_name   Borrower.NameofBook%TYPE := '&input_book_name';
+    
+    -- Variables for calculations
+    v_date_of_issue Borrower.DateofIssue%TYPE;
+    v_days_late     NUMBER;
+    v_fine_amount   Fine.Amt%TYPE := 0;
+
+BEGIN
+    -- 1. Get the issue date for the specific book and student
+    SELECT DateofIssue INTO v_date_of_issue
+    FROM Borrower
+    WHERE Roll_no = v_roll_no
+      AND NameofBook = v_book_name
+      AND Status = 'I'; -- Only process books that are currently 'Issued'
+
+    -- 2. Calculate the number of days (TRUNC removes time component)
+    v_days_late := TRUNC(SYSDATE) - TRUNC(v_date_of_issue);
+
+    -- 3. Check fine logic
+    IF v_days_late > 30 THEN
+        -- Rs 5 for first 30 days + Rs 50 for days after 30
+        v_fine_amount := (30 * 5) + ((v_days_late - 30) * 50);
+        
+    ELSIF v_days_late >= 15 AND v_days_late <= 30 THEN
+        -- Rs 5 per day
+        v_fine_amount := v_days_late * 5;
+        
+    END IF; -- If v_days_late < 15, fine remains 0
+    
+    -- 4. Update the book status from 'I' (Issued) to 'R' (Returned)
+    UPDATE Borrower
+    SET Status = 'R'
+    WHERE Roll_no = v_roll_no
+      AND NameofBook = v_book_name
+      AND Status = 'I';
+
+    -- 5. If a fine is due, insert it into the Fine table
+    IF v_fine_amount > 0 THEN
+        INSERT INTO Fine (Roll_no, "Date", Amt)
+        VALUES (v_roll_no, SYSDATE, v_fine_amount);
+        
+        DBMS_OUTPUT.PUT_LINE('Book returned. Days late: ' || v_days_late || '. Fine of Rs. ' || v_fine_amount || ' applied.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Book returned. Days late: ' || v_days_late || '. No fine.');
+    END IF;
+    
+    COMMIT; -- Make the changes permanent
+
+EXCEPTION
+    -- 6. Exception Handling
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error: No active record found for Roll No: ' || v_roll_no || ' with book: ' || v_book_name);
+        ROLLBACK;
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An unexpected error occurred: ' || SQLERRM);
+        ROLLBACK;
+END;
+/
+
+Area of Circle
+
+CREATE TABLE areas (
+    radius NUMBER,
+    area NUMBER
+);
+
+DECLARE
+    v_area NUMBER;
+    v_pi   CONSTANT NUMBER := 3.14159;
+BEGIN
+    -- Use a FOR loop control structure
+    FOR v_radius IN 5..9 LOOP
+    
+        -- Calculate the area
+        v_area := v_pi * (v_radius * v_radius);
+        
+        -- Store the radius and calculated area in the table
+        INSERT INTO areas (radius, area)
+        VALUES (v_radius, v_area);
+        
+    END LOOP;
+    
+    COMMIT; -- Save the inserted rows
+    DBMS_OUTPUT.PUT_LINE('Successfully populated the areas table.');
+
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+        ROLLBACK;
+END;
+/
+
+-- You can check the results with this query:
+SELECT * FROM areas;
+
+——————————————————————————————————
+
+Ass - 5
+
+——————————————————————————————————
+
+Grade System 
+
+-- Table to store student marks
+CREATE TABLE Stud_Marks (
+    Roll_no INT PRIMARY KEY,
+    Name VARCHAR2(100),
+    total_marks INT
+);
+
+-- Table to store the calculated results
+CREATE TABLE Result (
+    Roll INT,
+    Name VARCHAR2(100),
+    Class VARCHAR2(50),
+    CONSTRAINT fk_roll FOREIGN KEY (Roll) REFERENCES Stud_Marks(Roll_no)
+);
+
+-- Insert sample data into Stud_Marks to test with
+INSERT INTO Stud_Marks (Roll_no, Name, total_marks) VALUES (1, 'Arjun', 1200);
+INSERT INTO Stud_Marks (Roll_no, Name, total_marks) VALUES (2, 'Sneha', 950);
+INSERT INTO Stud_Marks (Roll_no, Name, total_marks) VALUES (3, 'Rohit', 850);
+INSERT INTO Stud_Marks (Roll_no, Name, total_marks) VALUES (4, 'Priya', 700);
+
+Stored Procedure (proc_Grade)
+
+CREATE OR REPLACE PROCEDURE proc_Grade (
+    p_roll_no IN Stud_Marks.Roll_no%TYPE
+)
+AS
+    v_name        Stud_Marks.Name%TYPE;
+    v_marks       Stud_Marks.total_marks%TYPE;
+    v_class       Result.Class%TYPE;
+BEGIN
+    -- 1. Get the student's details from the Stud_Marks table
+    SELECT Name, total_marks
+    INTO v_name, v_marks
+    FROM Stud_Marks
+    WHERE Roll_no = p_roll_no;
+
+    -- 2. Determine the class based on the marks
+    IF v_marks >= 990 AND v_marks <= 1500 THEN
+        v_class := 'Distinction';
+    ELSIF v_marks >= 900 AND v_marks <= 989 THEN
+        v_class := 'First Class';
+    ELSIF v_marks >= 825 AND v_marks <= 899 THEN
+        v_class := 'Higher Second Class';
+    ELSE
+        v_class := 'Other'; -- For marks below 825
+    END IF;
+
+    -- 3. Insert the categorized data into the Result table
+    INSERT INTO Result (Roll, Name, Class)
+    VALUES (p_roll_no, v_name, v_class);
+    
+    DBMS_OUTPUT.PUT_LINE('Successfully processed Roll No: ' || p_roll_no);
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error: No student found with Roll No: ' || p_roll_no);
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An unexpected error occurred: ' || SQLERRM);
+END proc_Grade;
+/
+
+PL/SQL Block to Use the Procedure
+
+BEGIN
+    -- Call the procedure for the sample data
+    proc_Grade(1); -- Arjun (1200) -> Distinction
+    proc_Grade(2); -- Sneha (950) -> First Class
+    proc_Grade(3); -- Rohit (850) -> Higher Second Class
+    proc_Grade(4); -- Priya (700) -> Other
+    
+    -- Test for a student that does not exist
+    proc_Grade(99); 
+
+    COMMIT; -- Save the changes
+END;
+/
+
+-- After running the block, check the Result table:
+-- SELECT * FROM Result;
+
+———————————————————————————————————
+
+Ass- 6
+
+———————————————————————————————————
+
+Cursor
+
+-- 1. Create the "Old" table with existing data
+CREATE TABLE O_RollCall (
+    Roll_no INT PRIMARY KEY,
+    Name VARCHAR2(100)
+);
+
+-- 2. Create the "New" table with data to be merged
+CREATE TABLE N_RollCall (
+    Roll_no INT,
+    Name VARCHAR2(100)
+);
+
+-- 3. Insert sample data
+-- Old data
+INSERT INTO O_RollCall VALUES (101, 'Amit');
+INSERT INTO O_RollCall VALUES (102, 'Sneha');
+
+-- New data
+INSERT INTO N_RollCall VALUES (102, 'Sneha');   -- This one should be skipped
+INSERT INTO N_RollCall VALUES (103, 'Rahul');   -- This one should be merged
+INSERT INTO N_RollCall VALUES (104, 'Priya');   -- This one should be merged
+
+COMMIT;
+
+— PL/SQL Block with Parameterized Cursor
+
+DECLARE
+    -- 1. Define the Parameterized Cursor.
+    -- It takes a roll number as a parameter and checks
+    -- if it exists in the O_RollCall table.
+    CURSOR c_check_old (p_roll_no IN O_RollCall.Roll_no%TYPE) IS
+        SELECT 1 
+        FROM O_RollCall 
+        WHERE Roll_no = p_roll_no;
+        
+    -- Variable to hold the result of the cursor fetch
+    v_exists NUMBER;
+
+BEGIN
+    -- 2. Use a Cursor FOR Loop to iterate through all records in the new table.
+    -- 'rec' is an implicitly defined record variable.
+    FOR rec IN (SELECT Roll_no, Name FROM N_RollCall) LOOP
+    
+        -- 3. Open the parameterized cursor, passing the current roll number
+        OPEN c_check_old(rec.Roll_no);
+        
+        -- 4. Fetch the result into the v_exists variable
+        FETCH c_check_old INTO v_exists;
+        
+        -- 5. Check the cursor's %NOTFOUND attribute.
+        -- If TRUE, it means the fetch found no matching record.
+        IF c_check_old%NOTFOUND THEN
+            -- Data does NOT exist, so we MERGE (INSERT) it.
+            INSERT INTO O_RollCall (Roll_no, Name)
+            VALUES (rec.Roll_no, rec.Name);
+            
+            DBMS_OUTPUT.PUT_LINE('MERGED: Roll No ' || rec.Roll_no || ' (' || rec.Name || ')');
+        ELSE
+            -- Data already exists, so we SKIP it.
+            DBMS_OUTPUT.PUT_LINE('SKIPPED: Roll No ' || rec.Roll_no || ' (' || rec.Name || ') already exists.');
+        END IF;
+        
+        -- 6. Close the parameterized cursor before the next loop iteration
+        CLOSE c_check_old;
+        
+    END LOOP;
+    
+    COMMIT; -- Save the changes made by the INSERT statements
+
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+        ROLLBACK;
+END;
+/
+
+SELECT * FROM O_RollCall ORDER BY Roll_no;
+
+————————————————————————————————
+
+Ass - 7
+
+————————————————————————————————
+
+Trigger
+
+-- 1. Create the main Library table
+CREATE TABLE Library (
+    book_id INT PRIMARY KEY,
+    title VARCHAR2(200),
+    author VARCHAR2(100),
+    status VARCHAR2(50) -- e.g., 'Available', 'On Loan'
+);
+
+-- 2. Create the table to store the audit trail
+CREATE TABLE Library_Audit (
+    old_book_id INT,
+    old_title VARCHAR2(200),
+    old_author VARCHAR2(100),
+    old_status VARCHAR2(50),
+    action_type VARCHAR2(10), -- 'UPDATE' or 'DELETE'
+    action_timestamp TIMESTAMP,  -- When the change happened
+    action_user VARCHAR2(100) -- Who made the change
+);
+
+— The Database Trigger
+
+CREATE OR REPLACE TRIGGER trg_Library_Audit
+-- Fire AFTER a DELETE or UPDATE operation
+AFTER DELETE OR UPDATE ON Library
+-- This makes it a ROW-LEVEL trigger
+FOR EACH ROW
+DECLARE
+    v_action VARCHAR2(10);
+BEGIN
+    -- 1. Determine which action (DELETE or UPDATE) fired the trigger
+    IF DELETING THEN
+        v_action := 'DELETE';
+    ELSIF UPDATING THEN
+        v_action := 'UPDATE';
+    END IF;
+    
+    -- 2. Insert the OLD values into the audit table.
+    -- The :OLD record contains the data as it was *before*
+    -- the DELETE or UPDATE statement.
+    INSERT INTO Library_Audit (
+        old_book_id,
+        old_title,
+        old_author,
+        old_status,
+        action_type,
+        action_timestamp,
+        action_user
+    )
+    VALUES (
+        :OLD.book_id,
+        :OLD.title,
+        :OLD.author,
+        :OLD.status,
+        v_action,
+        SYSTIMESTAMP,
+        USER
+    );
+
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Handle any unexpected errors during the trigger execution
+        DBMS_OUTPUT.PUT_LINE('Error in trg_Library_Audit: ' || SQLERRM);
+END trg_Library_Audit;
+/
+
+— How to Test the Trigger
+
+-- 1. Insert some sample data into the main Library table
+INSERT INTO Library VALUES (10, 'The Catcher in the Rye', 'J.D. Salinger', 'Available');
+INSERT INTO Library VALUES (11, '1984', 'George Orwell', 'Available');
+COMMIT;
+
+-- 2. Now, UPDATE one of the records
+-- (This should log the OLD 'Available' status to the audit table)
+UPDATE Library
+SET status = 'On Loan'
+WHERE book_id = 11;
+
+-- 3. Next, DELETE a record
+-- (This should log the entire 'The Catcher in the Rye' record)
+DELETE FROM Library
+WHERE book_id = 10;
+
+COMMIT;
+
+-- 4. Check the Library_Audit table to see the results!
+SELECT 
+    old_book_id, 
+    old_title, 
+    old_status, 
+    action_type 
+FROM Library_Audit;
+
+———————————————————————————————————
+
+MONGODB 
+
+———————————————————————————————————
+
+Setup
+
+// Connect to your database and switch to it (e.g., 'use myUniversityDB')
+db.students.insertMany([
+  { roll_no: 101, name: "Arjun", subject: "Math", marks: 85, city: "Pune" },
+  { roll_no: 102, name: "Sneha", subject: "Science", marks: 92, city: "Mumbai" },
+  { roll_no: 103, name: "Rohit", subject: "Math", marks: 78, city: "Pune" },
+  { roll_no: 104, name: "Priya", subject: "English", marks: 88, city: "Delhi" },
+  { roll_no: 105, name: "Amit", subject: "Science", marks: 75, city: "Mumbai" },
+  { roll_no: 106, name: "Kavita", subject: "Math", marks: 95, city: "Pune" }
+]);
+
+— create 
+db.students.insertOne(
+  { roll_no: 107, name: "Vikram", subject: "English", marks: 82, city: "Delhi" }
+);
+
+—read
+db.students.find();
+
+db.students.find(
+  { city: "Pune" }
+);
+
+db.students.find(
+  {
+    $or: [
+      { city: "Pune" },
+      { marks: { $gt: 90 } }
+    ]
+  }
+);
+
+— update 
+db.students.updateOne(
+  { roll_no: 104 }, // Filter: Find Priya
+  { $set: { marks: 90 } } // Update: Set her marks to 90
+);
+
+db.students.updateMany(
+  { city: "Mumbai" }, // Filter: All students in Mumbai
+  { $inc: { marks: 5 } }  // Update: Increment marks by 5
+);
+
+// 1. First, fetch a student
+var student = db.students.findOne({ roll_no: 101 });
+
+// 2. Modify the student object in your code
+student.name = "Arjun Sharma";
+student.marks = 87;
+
+// 3. Save the *entire* object back to the database
+// This replaces the original document with this new version
+db.students.save(student);
+
+— delete
+db.students.deleteOne(
+  { marks: { $lt: 80 } } // This will delete Rohit (marks: 78)
+);
+
+db.students.deleteMany(
+  { city: "Delhi" }
+);
+
+———————————————————————————————————————
+
+MongoDB - Aggregation and Indexing
+———————————————————————————————————————
+Aggregation
+
+The Aggregation Pipeline is used to process data through multiple stages.
+Example: Find the average marks for each subject, and sort them from highest average to lowest.
+db.students.aggregate([
+  // Stage 1: Group documents by the 'subject' field
+  {
+    $group: {
+      _id: "$subject", // The field to group by
+      averageMarks: { $avg: "$marks" }, // Calculate the average of 'marks' for each group
+      studentCount: { $sum: 1 } // Count the number of students in each group
+    }
+  },
+  
+  // Stage 2: Sort the resulting groups
+  {
+    $sort: { averageMarks: -1 } // Sort by averageMarks in descending order (-1)
+  }
+]);
+
+Indexing
+
+Indexes speed up read queries by providing a fast lookup path.
+Create a Single-Field Index: This makes queries that filter by city much faster.
+// 1 = ascending order
+db.students.createIndex({ city: 1 });
+Create a Compound Index: This is useful for queries that filter by subject and sort by marks.
+// 1 = ascending (for subject), -1 = descending (for marks)
+db.students.createIndex({ subject: 1, marks: -1 });
+
+db.students.getIndexes();
+
+——————————————————————————————————————————————
+
+MongoDB - MapReduce Operations
+
+——————————————————————————————————————————————
+
+Step 1: The map function This function is run on every document. It emits a key (the subject) and a value (the marks).
+var mapFunction = function() {
+    emit(this.subject, this.marks);
+};
+
+Step 2: The reduce function This function takes all the values emitted for a single key (e.g., "Math", [85, 78, 95]) and "reduces" them to a single result.
+var reduceFunction = function(keySubject, valuesMarks) {
+    // valuesMarks is an array of all marks for that keySubject
+    return Array.avg(valuesMarks);
+};
+
+Step 3: Run the MapReduce operation This command runs the functions and stores the final results in a new collection named subject_averages.
+db.students.mapReduce(
+    mapFunction,
+    reduceFunction,
+    { out: "subject_averages" } // Output the results to this collection
+);
+
+// To see the results, you then query the new collection:
+db.subject_averages.find();
+
+By aggregation —
+db.students.aggregate([
+  
+  // Stage 1: Group all documents by the 'subject' field
+  {
+    $group: {
+       // _id specifies the key to group by
+       _id: "$subject", 
+       
+       // Define a new field 'averageMarks'
+       // Use the $avg operator to get the average of the 'marks' field
+       averageMarks: { $avg: "$marks" } 
+    }
+  }
+
+]);
+
+Sudo mysql -u root -p
+
+mongosh
